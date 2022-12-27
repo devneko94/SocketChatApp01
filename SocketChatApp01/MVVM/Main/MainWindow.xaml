@@ -18,54 +18,12 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/MVVM/Main/MainWindowStyle.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<Style x:Key="SettingTextBoxStyle"
-				   TargetType="{x:Type c:MyTextBox}"
-				   BasedOn="{StaticResource MyTextBoxBaseStyle}">
-				<Setter Property="Margin"
-						Value="0" />
-				<Setter Property="Padding"
-						Value="0" />
-				<Setter Property="FontSize"
-						Value="12" />
-				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsListening}"
-								 Value="False">
-						<Setter Property="IsEnabled"
-								Value="True" />
-					</DataTrigger>
-					<DataTrigger Binding="{Binding IsListening}"
-								 Value="True">
-						<Setter Property="IsEnabled"
-								Value="False" />
-					</DataTrigger>
-				</Style.Triggers>
-			</Style>
-			<Style x:Key="SettngTextBlockStyle"
-				   TargetType="TextBlock"
-				   BasedOn="{StaticResource TextBlockBaseStyle}">
-				<Setter Property="FontSize"
-						Value="12" />
-			</Style>
-			<Style x:Key="SettngButtonStyle"
-				   TargetType="Button"
-				   BasedOn="{StaticResource ButtonBaseStyle}">
-				<Setter Property="Padding"
-						Value="10,0" />
-				<Setter Property="FontSize"
-						Value="12" />
-				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsListening}"
-								 Value="False">
-						<Setter Property="Content"
-								Value="受信開始" />
-					</DataTrigger>
-					<DataTrigger Binding="{Binding IsListening}"
-								 Value="True">
-						<Setter Property="Content"
-								Value="受信終了" />
-					</DataTrigger>
-				</Style.Triggers>
-			</Style>
+			<Style TargetType="TextBlock"
+				   BasedOn="{StaticResource TextBlockBaseStyle}" />
+			<Style TargetType="c:MyTextBox"
+				   BasedOn="{StaticResource MyTextBoxBaseStyle}" />
+			<Style TargetType="Button"
+				   BasedOn="{StaticResource ButtonBaseStyle}" />
 		</ResourceDictionary>
 	</Window.Resources>
 
@@ -79,6 +37,34 @@
 		<Grid Grid.Row="0"
 			  Background="CornflowerBlue">
 			<Grid Margin="5">
+				<Grid.Resources>
+					<Style TargetType="TextBlock"
+						   BasedOn="{StaticResource SettingTextBlockStyle}" />
+					<Style TargetType="c:MyTextBox"
+						   BasedOn="{StaticResource SettingTextBoxStyle}">
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding IsListening}"
+										 Value="True">
+								<Setter Property="IsEnabled"
+										Value="False" />
+							</DataTrigger>
+						</Style.Triggers>
+						<Setter Property="IsEnabled"
+								Value="True" />
+					</Style>
+					<Style TargetType="Button"
+						   BasedOn="{StaticResource SettingButtonStyle}">
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding IsListening}"
+										 Value="True">
+								<Setter Property="Content"
+										Value="受信終了" />
+							</DataTrigger>
+						</Style.Triggers>
+						<Setter Property="Content"
+								Value="受信開始" />
+					</Style>
+				</Grid.Resources>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="auto" />
 					<ColumnDefinition />
@@ -94,55 +80,46 @@
 
 				<TextBlock Grid.Row="0"
 						   Grid.Column="0"
-						   Style="{StaticResource SettngTextBlockStyle}"
 						   Margin="0,0,5,0"
 						   Text="LocalIP" />
 
 				<c:MyTextBox Grid.Row="0"
 							 Grid.Column="1"
-							 Style="{StaticResource SettingTextBoxStyle}"
 							 Text="{Binding LocalIP}" />
 
 				<TextBlock Grid.Row="0"
 						   Grid.Column="2"
-						   Style="{StaticResource SettngTextBlockStyle}"
 						   Margin="5,0"
 						   Text="LocalPort" />
 
 				<c:MyTextBox Grid.Row="0"
 							 Grid.Column="3"
-							 Style="{StaticResource SettingTextBoxStyle}"
 							 Format="0-9"
 							 Text="{Binding LocalPort}" />
 
 				<TextBlock Grid.Row="2"
 						   Grid.Column="0"
-						   Style="{StaticResource SettngTextBlockStyle}"
 						   Margin="0,0,5,0"
 						   Text="RemoteIP" />
 
 				<c:MyTextBox Grid.Row="2"
 							 Grid.Column="1"
-							 Style="{StaticResource SettingTextBoxStyle}"
 							 IsEnabled="True"
 							 Text="{Binding RemoteIP}" />
 
 				<TextBlock Grid.Row="2"
 						   Grid.Column="2"
-						   Style="{StaticResource SettngTextBlockStyle}"
 						   Margin="5,0"
 						   Text="RemotePort" />
 
 				<c:MyTextBox Grid.Row="2"
 							 Grid.Column="3"
-							 Style="{StaticResource SettingTextBoxStyle}"
 							 IsEnabled="True"
 							 Format="0-9"
 							 Text="{Binding RemotePort}" />
 
 				<Button Grid.Row="2"
 						Grid.Column="4"
-						Style="{StaticResource SettngButtonStyle}"
 						Margin="5,0,0,0"
 						Command="{Binding ListenCommand}" />
 			</Grid>
@@ -177,18 +154,15 @@
 				</Grid.ColumnDefinitions>
 
 				<TextBlock Grid.Column="0"
-						   Style="{StaticResource TextBlockBaseStyle}"
 						   Margin="0,0,5,0"
 						   Text="メッセージ" />
 
 				<c:MyTextBox Grid.Column="1"
-							 Style="{StaticResource MyTextBoxBaseStyle}"
 							 Text="{Binding InputMessage, UpdateSourceTrigger=PropertyChanged}" />
 
 				<Button Grid.Column="2"
 						Margin="5,0,0,0"
 						Content="送信"
-						Style="{StaticResource ButtonBaseStyle}"
 						Command="{Binding SendMessageCommand}" />
 			</Grid>
 		</Grid>

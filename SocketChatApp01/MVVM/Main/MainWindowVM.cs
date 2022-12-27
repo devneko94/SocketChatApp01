@@ -301,7 +301,7 @@ namespace SocketChatApp01.MVVM.Main
             }
             catch (SocketException)
             {
-                MessageBox.Show("Remoteとの接続が切断されました。");
+                MessageBox.Show("受信時にRemoteとの接続が切断されました。");
                 BeginInvoke(this.EndListen);
                 return;
             }
@@ -328,7 +328,7 @@ namespace SocketChatApp01.MVVM.Main
             }
             catch (SocketException)
             {
-                MessageBox.Show("Remoteとの接続が切断されました。");
+                MessageBox.Show("送信時にRemoteとの接続が切断されました。");
                 BeginInvoke(this.EndListen);
                 return;
             }
@@ -365,10 +365,6 @@ namespace SocketChatApp01.MVVM.Main
                         IsSendMessage = true,
                     });
                 });
-            }
-            else
-            {
-                MessageBox.Show("メッセージ送信に失敗しました。");
             }
         }
 
