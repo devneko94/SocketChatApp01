@@ -4,7 +4,6 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:main="clr-namespace:SocketChatApp01.MVVM.Main"
-		xmlns:c="clr-namespace:SocketChatApp01.Controls"
 		mc:Ignorable="d"
 		Title="SocketChatApp01"
 		WindowStartupLocation="CenterOwner"
@@ -13,19 +12,6 @@
 	<Window.DataContext>
 		<main:MainWindowVM />
 	</Window.DataContext>
-	<Window.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="/MVVM/Main/MainWindowStyle.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-			<Style TargetType="TextBlock"
-				   BasedOn="{StaticResource TextBlockBaseStyle}" />
-			<Style TargetType="c:MyTextBox"
-				   BasedOn="{StaticResource MyTextBoxBaseStyle}" />
-			<Style TargetType="Button"
-				   BasedOn="{StaticResource ButtonBaseStyle}" />
-		</ResourceDictionary>
-	</Window.Resources>
 
 	<Grid Background="LightBlue">
 		<Grid.RowDefinitions>
@@ -37,34 +23,6 @@
 		<Grid Grid.Row="0"
 			  Background="CornflowerBlue">
 			<Grid Margin="5">
-				<Grid.Resources>
-					<Style TargetType="TextBlock"
-						   BasedOn="{StaticResource SettingTextBlockStyle}" />
-					<Style TargetType="c:MyTextBox"
-						   BasedOn="{StaticResource SettingTextBoxStyle}">
-						<Style.Triggers>
-							<DataTrigger Binding="{Binding IsListening}"
-										 Value="True">
-								<Setter Property="IsEnabled"
-										Value="False" />
-							</DataTrigger>
-						</Style.Triggers>
-						<Setter Property="IsEnabled"
-								Value="True" />
-					</Style>
-					<Style TargetType="Button"
-						   BasedOn="{StaticResource SettingButtonStyle}">
-						<Style.Triggers>
-							<DataTrigger Binding="{Binding IsListening}"
-										 Value="True">
-								<Setter Property="Content"
-										Value="受信終了" />
-							</DataTrigger>
-						</Style.Triggers>
-						<Setter Property="Content"
-								Value="受信開始" />
-					</Style>
-				</Grid.Resources>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="auto" />
 					<ColumnDefinition />
@@ -83,65 +41,96 @@
 						   Margin="0,0,5,0"
 						   Text="LocalIP" />
 
-				<c:MyTextBox Grid.Row="0"
-							 Grid.Column="1"
-							 Text="{Binding LocalIP}" />
+				<TextBox Grid.Row="0"
+						 Grid.Column="1"
+						 Text="{Binding LocalIP}">
+					<TextBox.Style>
+						<Style TargetType="TextBox">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsListening}"
+											 Value="True">
+									<Setter Property="IsEnabled"
+											Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+							<Setter Property="IsEnabled"
+									Value="True" />
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 				<TextBlock Grid.Row="0"
 						   Grid.Column="2"
 						   Margin="5,0"
 						   Text="LocalPort" />
 
-				<c:MyTextBox Grid.Row="0"
-							 Grid.Column="3"
-							 Format="0-9"
-							 Text="{Binding LocalPort}" />
+				<TextBox Grid.Row="0"
+						 Grid.Column="3"
+						 Text="{Binding LocalPort}">
+					<TextBox.Style>
+						<Style TargetType="TextBox">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsListening}"
+											 Value="True">
+									<Setter Property="IsEnabled"
+											Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+							<Setter Property="IsEnabled"
+									Value="True" />
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 				<TextBlock Grid.Row="2"
 						   Grid.Column="0"
 						   Margin="0,0,5,0"
 						   Text="RemoteIP" />
 
-				<c:MyTextBox Grid.Row="2"
-							 Grid.Column="1"
-							 IsEnabled="True"
-							 Text="{Binding RemoteIP}" />
+				<TextBox Grid.Row="2"
+						 Grid.Column="1"
+						 IsEnabled="True"
+						 Text="{Binding RemoteIP}" />
 
 				<TextBlock Grid.Row="2"
 						   Grid.Column="2"
 						   Margin="5,0"
 						   Text="RemotePort" />
 
-				<c:MyTextBox Grid.Row="2"
-							 Grid.Column="3"
-							 IsEnabled="True"
-							 Format="0-9"
-							 Text="{Binding RemotePort}" />
+				<TextBox Grid.Row="2"
+						 Grid.Column="3"
+						 IsEnabled="True"
+						 Text="{Binding RemotePort}" />
 
-				<Button Grid.Row="2"
+				<Button Grid.Row="0"
 						Grid.Column="4"
 						Margin="5,0,0,0"
-						Command="{Binding ListenCommand}" />
+						Command="{Binding ListenCommand}">
+					<Button.Style>
+						<Style TargetType="Button">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsListening}"
+											 Value="True">
+									<Setter Property="Content"
+											Value="受信終了" />
+								</DataTrigger>
+							</Style.Triggers>
+							<Setter Property="Content"
+									Value="受信開始" />
+						</Style>
+					</Button.Style>
+				</Button>
 			</Grid>
 		</Grid>
 
 		<Grid Grid.Row="1"
 			  Margin="5,20">
-			<ListView ItemsSource="{Binding MessageList}"
-					  BorderThickness="0"
-					  Background="Transparent">
-				<ListView.ItemContainerStyle>
-					<Style TargetType="ListViewItem">
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="ListViewItem">
-									<ContentPresenter Margin="5" />
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-					</Style>
-				</ListView.ItemContainerStyle>
-			</ListView>
+			<ScrollViewer>
+				<TextBlock VerticalAlignment="Stretch"
+						   HorizontalAlignment="Stretch"
+						   TextWrapping="WrapWithOverflow"
+						   Text="{Binding MessageList}" />
+			</ScrollViewer>
 		</Grid>
 
 		<Grid Grid.Row="2"
@@ -157,13 +146,27 @@
 						   Margin="0,0,5,0"
 						   Text="メッセージ" />
 
-				<c:MyTextBox Grid.Column="1"
-							 Text="{Binding InputMessage, UpdateSourceTrigger=PropertyChanged}" />
+				<TextBox Grid.Column="1"
+						 Text="{Binding InputMessage, UpdateSourceTrigger=PropertyChanged}" />
 
 				<Button Grid.Column="2"
 						Margin="5,0,0,0"
 						Content="送信"
-						Command="{Binding SendMessageCommand}" />
+						Command="{Binding SendMessageCommand}">
+					<Button.Style>
+						<Style TargetType="Button">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsListening}"
+											 Value="True">
+									<Setter Property="IsEnabled"
+											Value="True" />
+								</DataTrigger>
+							</Style.Triggers>
+							<Setter Property="IsEnabled"
+									Value="False" />
+						</Style>
+					</Button.Style>
+				</Button>
 			</Grid>
 		</Grid>
 	</Grid>

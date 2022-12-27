@@ -3,10 +3,10 @@
 // 作成者: M.Gotou
 
 using SocketChatApp01.Common;
-using SocketChatApp01.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -25,13 +25,6 @@ namespace SocketChatApp01.MVVM.Main
     /// </summary>
     class MainWindowVM : BindableBase
     {
-        #region 定数
-        /// <summary>
-        /// メッセージリストの最大保持数
-        /// </summary>
-        private readonly int MAX_MESSAGE_COUNT = 50;
-        #endregion
-
         #region プライベートフィールド
         /// <summary>
         /// UDPクライアント
@@ -57,11 +50,11 @@ namespace SocketChatApp01.MVVM.Main
             }
         }
 
-        private int? _localPort = 10001;
+        private string _localPort = "10001";
         /// <summary>
         /// ローカルポート
         /// </summary>
-        public int? LocalPort
+        public string LocalPort
         {
             get { return _localPort; }
             set
@@ -91,11 +84,11 @@ namespace SocketChatApp01.MVVM.Main
             }
         }
 
-        private int? _remotePort = 10002;
+        private string _remotePort = "10002";
         /// <summary>
         /// リモートポート
         /// </summary>
-        public int? RemotePort
+        public string RemotePort
         {
             get { return _remotePort; }
             set
@@ -126,11 +119,11 @@ namespace SocketChatApp01.MVVM.Main
             }
         }
 
-        private ObservableCollection<MessageControl> _messageList = new();
+        private string _messageList = "";
         /// <summary>
         /// メッセージリスト
         /// </summary>
-        public ObservableCollection<MessageControl> MessageList
+        public string MessageList
         {
             get { return _messageList; }
             set
@@ -156,8 +149,6 @@ namespace SocketChatApp01.MVVM.Main
                 {
                     _isListening = value;
                     OnPropertyChanged();
-                    ListenCommand.OnCanExecuteChanged();
-                    SendMessageCommand.OnCanExecuteChanged();
                 }
             }
         }
@@ -183,7 +174,7 @@ namespace SocketChatApp01.MVVM.Main
         public MainWindowVM()
         {
             ListenCommand = new DelegateCommand(BeginListen);
-            SendMessageCommand = new DelegateCommand(SendMessage, () => IsListening && InputMessage != "");
+            SendMessageCommand = new DelegateCommand(SendMessage);
         }
         #endregion
 
@@ -193,13 +184,14 @@ namespace SocketChatApp01.MVVM.Main
         /// </summary>
         ~MainWindowVM()
         {
-            BeginInvoke(this.EndListen);
+            EndListen();
         }
         #endregion
 
         #region プライベートメソッド
         /// <summary>
         /// 受信待ち状態を開始します。
+        /// 実行時に受信待ち中だった場合は受信待ち状態を終了します。
         /// </summary>
         private void BeginListen()
         {
@@ -207,7 +199,7 @@ namespace SocketChatApp01.MVVM.Main
             {
                 if (IsListening)
                 {
-                    BeginInvoke(this.EndListen);
+                    EndListen();
                 }
                 else
                 {
@@ -216,7 +208,7 @@ namespace SocketChatApp01.MVVM.Main
                         return;
                     }
 
-                    IPEndPoint localEP = new(IPAddress.Parse(LocalIP), LocalPort!.Value);
+                    IPEndPoint localEP = new(IPAddress.Parse(LocalIP), int.Parse(LocalPort));
                     _client = new UdpClient(localEP);
                     _client.BeginReceive(RecieveCallBack, _client);
 
@@ -226,38 +218,26 @@ namespace SocketChatApp01.MVVM.Main
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                EndListen();
                 return;
             }
         }
 
         /// <summary>
-        /// 接続ソケットの疎通確認を行います。
+        /// IPアドレスとポートが不正でないか確認します。
         /// </summary>
         /// <returns></returns>
         private bool ValidateConnect()
         {
-            if (!IPAddress.TryParse(this.LocalIP, out IPAddress? localIP) || localIP is null || !this.LocalPort.HasValue)
+            if (!IPAddress.TryParse(LocalIP, out IPAddress? _) || !int.TryParse(LocalPort, out int _))
             {
                 MessageBox.Show("LocalIPまたはLocalPortが不正です。");
                 return false;
             }
 
-            if (new Ping().Send(localIP).Status != IPStatus.Success)
-            {
-                MessageBox.Show("Localが見つかりません。");
-                return false;
-            }
-
-            if (!IPAddress.TryParse(this.RemoteIP, out IPAddress? remoteIP) || remoteIP is null || !this.RemotePort.HasValue)
+            if (!IPAddress.TryParse(RemoteIP, out IPAddress? _) || !int.TryParse(RemotePort, out int _))
             {
                 MessageBox.Show("RemoteIPまたはRemotePortが不正です。");
-                return false;
-            }
-
-            if (new Ping().Send(remoteIP).Status != IPStatus.Success)
-            {
-                MessageBox.Show("Remoteが見つかりません。");
                 return false;
             }
 
@@ -278,37 +258,18 @@ namespace SocketChatApp01.MVVM.Main
                     return;
                 }
 
-                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
-                byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP!) ?? Array.Empty<byte>();
-                string rcvMessage = Encoding.GetEncoding("Shift_JIS").GetString(rcvBytes);
+                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), int.Parse(RemotePort));
+                byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP) ?? Array.Empty<byte>();
+                string rcvMessage = Encoding.UTF8.GetString(rcvBytes);
 
-                BeginInvoke(() =>
-                {
-                    if (MessageList.Count == MAX_MESSAGE_COUNT)
-                    {
-                        MessageList.RemoveAt(0);
-                    }
-
-                    MessageList.Add(new MessageControl
-                    {
-                        MessageText = rcvMessage,
-                        MessageTime = DateTime.Now,
-                        IsSendMessage = false,
-                    });
-                });
+                MessageList += ($"[受信: {DateTime.Now:HH:mm}] {rcvMessage}\n");
 
                 udp.BeginReceive(RecieveCallBack, udp);
-            }
-            catch (SocketException)
-            {
-                MessageBox.Show("受信時にRemoteとの接続が切断されました。");
-                BeginInvoke(this.EndListen);
-                return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                EndListen();
                 return;
             }
         }
@@ -321,21 +282,15 @@ namespace SocketChatApp01.MVVM.Main
             try
             {
                 _client ??= new UdpClient();
-                byte[] sendBytes = Encoding.GetEncoding("Shift_JIS").GetBytes(InputMessage);
+                byte[] sendBytes = Encoding.UTF8.GetBytes(InputMessage);
 
-                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
+                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), int.Parse(RemotePort));
                 _client.BeginSend(sendBytes, sendBytes.Length, remoteEP, SendCallBack, _client);
-            }
-            catch (SocketException)
-            {
-                MessageBox.Show("送信時にRemoteとの接続が切断されました。");
-                BeginInvoke(this.EndListen);
-                return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                EndListen();
                 return;
             }
         }
@@ -346,25 +301,21 @@ namespace SocketChatApp01.MVVM.Main
         /// <param name="ar"></param>
         private void SendCallBack(IAsyncResult ar)
         {
-            UdpClient? udp = ar.AsyncState as UdpClient;
-            int? sendBytesCount = udp?.EndSend(ar);
-
-            if (sendBytesCount is not null && 0 < sendBytesCount)
+            try
             {
-                BeginInvoke(() =>
-                {
-                    if (MessageList.Count == MAX_MESSAGE_COUNT)
-                    {
-                        MessageList.RemoveAt(0);
-                    }
+                UdpClient? udp = ar.AsyncState as UdpClient;
+                int? sendBytesCount = udp?.EndSend(ar);
 
-                    MessageList.Add(new MessageControl
-                    {
-                        MessageText = InputMessage,
-                        MessageTime = DateTime.Now,
-                        IsSendMessage = true,
-                    });
-                });
+                if (sendBytesCount is not null)
+                {
+                    MessageList += ($"[送信: {DateTime.Now:HH:mm}] {InputMessage}\n");
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+                EndListen();
+                return;
             }
         }
 
@@ -376,16 +327,6 @@ namespace SocketChatApp01.MVVM.Main
             _client?.Close();
             _client = null;
             IsListening = false;
-        }
-
-        /// <summary>
-        /// Application.Current.Dispatcher.BeginInvokeに処理を渡します。
-        /// </summary>
-        /// <param name="action"></param>
-        /// <param name="args"></param>
-        private void BeginInvoke(Action action, params object[] args)
-        {
-            Application.Current.Dispatcher.BeginInvoke(action, args);
         }
         #endregion
     }
