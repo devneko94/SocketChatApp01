@@ -34,7 +34,7 @@
 				   VerticalAlignment="Bottom"
 				   HorizontalAlignment="Right"
 				   FontSize="12"
-				   Text="{Binding MessageTime, StringFormat=T, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MessageControl}}}">
+				   Text="{Binding MessageTime, StringFormat=H:mm, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MessageControl}}}">
 			<TextBlock.Style>
 				<Style TargetType="TextBlock">
 					<Style.Triggers>

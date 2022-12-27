@@ -27,12 +27,12 @@
 				<Setter Property="FontSize"
 						Value="12" />
 				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsRunning}"
+					<DataTrigger Binding="{Binding IsListening}"
 								 Value="False">
 						<Setter Property="IsEnabled"
 								Value="True" />
 					</DataTrigger>
-					<DataTrigger Binding="{Binding IsRunning}"
+					<DataTrigger Binding="{Binding IsListening}"
 								 Value="True">
 						<Setter Property="IsEnabled"
 								Value="False" />
@@ -53,12 +53,12 @@
 				<Setter Property="FontSize"
 						Value="12" />
 				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsRunning}"
+					<DataTrigger Binding="{Binding IsListening}"
 								 Value="False">
 						<Setter Property="Content"
 								Value="接続" />
 					</DataTrigger>
-					<DataTrigger Binding="{Binding IsRunning}"
+					<DataTrigger Binding="{Binding IsListening}"
 								 Value="True">
 						<Setter Property="Content"
 								Value="切断" />
