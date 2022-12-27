@@ -322,7 +322,6 @@ namespace SocketChatApp01.MVVM.Main
             {
                 _client ??= new UdpClient();
                 byte[] sendBytes = Encoding.GetEncoding("Shift_JIS").GetBytes(InputMessage);
-
                 IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
                 _client.BeginSend(sendBytes, sendBytes.Length, remoteEP, SendCallBack, _client);
             }

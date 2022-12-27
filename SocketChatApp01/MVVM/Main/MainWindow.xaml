@@ -118,7 +118,7 @@
 							 Format="0-9"
 							 Text="{Binding RemotePort}" />
 
-				<Button Grid.Row="2"
+				<Button Grid.Row="0"
 						Grid.Column="4"
 						Margin="5,0,0,0"
 						Command="{Binding ListenCommand}" />
@@ -141,6 +141,28 @@
 						</Setter>
 					</Style>
 				</ListView.ItemContainerStyle>
+				<d:ListView.ItemsSource>
+					<CompositeCollection>
+						<ListViewItem>
+							<ListViewItem.Template>
+								<ControlTemplate>
+									<c:MessageControl MessageText="こんにちは"
+													  MessageTime="14:45:32"
+													  IsSendMessage="True" />
+								</ControlTemplate>
+							</ListViewItem.Template>
+						</ListViewItem>
+						<ListViewItem>
+							<ListViewItem.Template>
+								<ControlTemplate>
+									<c:MessageControl MessageText="こんばんは"
+													  MessageTime="18:24:40"
+													  IsSendMessage="False" />
+								</ControlTemplate>
+							</ListViewItem.Template>
+						</ListViewItem>
+					</CompositeCollection>
+				</d:ListView.ItemsSource>
 			</ListView>
 		</Grid>
 
