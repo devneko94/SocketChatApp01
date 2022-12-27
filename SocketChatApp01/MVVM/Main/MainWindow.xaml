@@ -125,7 +125,7 @@
 
 		<Grid Grid.Row="1"
 			  Margin="5,20">
-			<ScrollViewer>
+			<ScrollViewer VerticalScrollBarVisibility="Auto">
 				<TextBlock VerticalAlignment="Stretch"
 						   HorizontalAlignment="Stretch"
 						   TextWrapping="WrapWithOverflow"

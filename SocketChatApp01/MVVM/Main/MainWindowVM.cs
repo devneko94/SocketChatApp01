@@ -164,7 +164,6 @@ namespace SocketChatApp01.MVVM.Main
         /// メッセージ送信コマンド
         /// </summary>
         public DelegateCommand SendMessageCommand { get; private set; }
-
         #endregion
 
         #region コンストラクタ
@@ -178,20 +177,10 @@ namespace SocketChatApp01.MVVM.Main
         }
         #endregion
 
-        #region デストラクタ
-        /// <summary>
-        /// デストラクタ
-        /// </summary>
-        ~MainWindowVM()
-        {
-            EndListen();
-        }
-        #endregion
-
         #region プライベートメソッド
         /// <summary>
-        /// 受信待ち状態を開始します。
-        /// 実行時に受信待ち中だった場合は受信待ち状態を終了します。
+        /// 受信待ちを開始します。
+        /// 実行時に受信待ち中だった場合は受信待ちを終了します。
         /// </summary>
         private void BeginListen()
         {
@@ -235,12 +224,6 @@ namespace SocketChatApp01.MVVM.Main
                 return false;
             }
 
-            if (!IPAddress.TryParse(RemoteIP, out IPAddress? _) || !int.TryParse(RemotePort, out int _))
-            {
-                MessageBox.Show("RemoteIPまたはRemotePortが不正です。");
-                return false;
-            }
-
             return true;
         }
 
@@ -253,11 +236,6 @@ namespace SocketChatApp01.MVVM.Main
             try
             {
                 UdpClient? udp = ar.AsyncState as UdpClient;
-                if (udp?.Client is null)
-                {
-                    return;
-                }
-
                 IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), int.Parse(RemotePort));
                 byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP) ?? Array.Empty<byte>();
                 string rcvMessage = Encoding.UTF8.GetString(rcvBytes);
@@ -283,8 +261,8 @@ namespace SocketChatApp01.MVVM.Main
             {
                 _client ??= new UdpClient();
                 byte[] sendBytes = Encoding.UTF8.GetBytes(InputMessage);
-
                 IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), int.Parse(RemotePort));
+
                 _client.BeginSend(sendBytes, sendBytes.Length, remoteEP, SendCallBack, _client);
             }
             catch (Exception e)
@@ -320,7 +298,7 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         /// <summary>
-        /// 受信待ち状態を終了します。
+        /// 受信待ちを終了します。
         /// </summary>
         private void EndListen()
         {
