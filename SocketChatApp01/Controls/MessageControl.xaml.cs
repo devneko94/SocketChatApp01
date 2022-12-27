@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SocketChatApp01
+namespace SocketChatApp01.Controls
 {
     /// <summary>
     /// MessageControl.xaml の相互作用ロジック

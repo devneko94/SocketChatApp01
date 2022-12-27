@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace SocketChatApp01
+namespace SocketChatApp01.Controls
 {
     public class MyTextBox : TextBox
     {
@@ -24,7 +24,7 @@ namespace SocketChatApp01
         {
             base.OnPreviewTextInput(e);
 
-            if (string.IsNullOrEmpty(this.Format))
+            if (string.IsNullOrEmpty(Format))
             {
                 return;
             }

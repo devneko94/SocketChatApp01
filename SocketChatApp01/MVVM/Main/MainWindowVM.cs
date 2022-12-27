@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SocketChatApp01.Common;
+using SocketChatApp01.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
-namespace SocketChatApp01
+namespace SocketChatApp01.MVVM.Main
 {
     class MainWindowVM : BindableBase
     {
@@ -21,7 +23,7 @@ namespace SocketChatApp01
         #endregion
 
         #region プライベートフィールド
-        private UdpClient? client = null;
+        private UdpClient? _client = null;
         #endregion
 
         #region プロパティ
@@ -110,17 +112,18 @@ namespace SocketChatApp01
             }
         }
 
-        private bool _isRunning;
+        private bool _isListening;
         public bool IsListening
         {
-            get { return _isRunning; }
+            get { return _isListening; }
             private set
             {
-                if (_isRunning != value)
+                if (_isListening != value)
                 {
-                    _isRunning = value;
+                    _isListening = value;
                     OnPropertyChanged();
                     ConnectCommand.OnCanExecuteChanged();
+                    SendMessageCommand.OnCanExecuteChanged();
                 }
             }
         }
@@ -137,14 +140,14 @@ namespace SocketChatApp01
         public MainWindowVM()
         {
             ConnectCommand = new DelegateCommand(Connect);
-            SendMessageCommand = new DelegateCommand(SendMessage, () => InputMessage != "");
+            SendMessageCommand = new DelegateCommand(SendMessage, () => IsListening && InputMessage != "");
         }
         #endregion
 
         #region デストラクタ
         ~MainWindowVM()
         {
-            this.BeginInvoke(this.DisConnect);
+            BeginInvoke(this.DisConnect);
         }
         #endregion
 
@@ -155,7 +158,7 @@ namespace SocketChatApp01
             {
                 if (IsListening)
                 {
-                    this.BeginInvoke(this.DisConnect);
+                    BeginInvoke(this.DisConnect);
                 }
                 else
                 {
@@ -164,10 +167,9 @@ namespace SocketChatApp01
                         return;
                     }
 
-                    IPEndPoint localEP = new(IPAddress.Parse(this.LocalIP), this.LocalPort!.Value);
-
-                    client = new UdpClient(localEP);
-                    client.BeginReceive(this.RecieveCallBack, client);
+                    IPEndPoint localEP = new(IPAddress.Parse(LocalIP), LocalPort!.Value);
+                    _client = new UdpClient(localEP);
+                    _client.BeginReceive(RecieveCallBack, _client);
 
                     IsListening = true;
                 }
@@ -175,7 +177,8 @@ namespace SocketChatApp01
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                throw;
+                BeginInvoke(this.DisConnect);
+                return;
             }
         }
 
@@ -218,19 +221,18 @@ namespace SocketChatApp01
                     return;
                 }
 
-                IPEndPoint remoteEP = new(IPAddress.Parse(this.RemoteIP), this.RemotePort!.Value);
-
+                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
                 byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP) ?? Array.Empty<byte>();
                 string rcvMessage = Encoding.GetEncoding("Shift_JIS").GetString(rcvBytes);
 
-                this.BeginInvoke(() =>
+                BeginInvoke(() =>
                 {
-                    if (this.MessageList.Count == MAX_MESSAGE_COUNT)
+                    if (MessageList.Count == MAX_MESSAGE_COUNT)
                     {
-                        this.MessageList.RemoveAt(0);
+                        MessageList.RemoveAt(0);
                     }
 
-                    this.MessageList.Add(new MessageControl
+                    MessageList.Add(new MessageControl
                     {
                         MessageText = rcvMessage,
                         MessageTime = DateTime.Now,
@@ -238,12 +240,18 @@ namespace SocketChatApp01
                     });
                 });
 
-                udp.BeginReceive(this.RecieveCallBack, udp);
+                udp.BeginReceive(RecieveCallBack, udp);
+            }
+            catch (SocketException se)
+            {
+                MessageBox.Show("Remoteとの接続が切断されました。");
+                BeginInvoke(this.DisConnect);
+                return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                this.BeginInvoke(this.DisConnect);
+                BeginInvoke(this.DisConnect);
                 return;
             }
         }
@@ -252,60 +260,66 @@ namespace SocketChatApp01
         {
             try
             {
-                byte[] sendBytes = Encoding.GetEncoding("Shift_JIS").GetBytes(this.InputMessage);
+                _client ??= new UdpClient();
+                byte[] sendBytes = Encoding.GetEncoding("Shift_JIS").GetBytes(InputMessage);
 
-                client ??= new UdpClient();
+                IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
 
-                IPEndPoint remoteEP = new(IPAddress.Parse(this.RemoteIP), this.RemotePort!.Value);
-                client.BeginSend(sendBytes, sendBytes.Length, remoteEP, this.SendCallBack, client);
+                IPEndPoint[] activeUdpListeners = IPGlobalProperties.GetIPGlobalProperties().GetActiveUdpListeners();
+                if (!activeUdpListeners.Contains(remoteEP))
+                {
+                    MessageBox.Show("Remoteが見つかりませんでした。");
+                    return;
+                }
+
+                _client.BeginSend(sendBytes, sendBytes.Length, remoteEP, SendCallBack, _client);
+            }
+            catch (SocketException se)
+            {
+                MessageBox.Show("Remoteとの接続が切断されました。");
+                BeginInvoke(this.DisConnect);
+                return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                throw;
+                BeginInvoke(this.DisConnect);
+                return;
             }
         }
 
         private void SendCallBack(IAsyncResult ar)
         {
-            try
-            {
-                UdpClient udp = ar.AsyncState as UdpClient;
-                int? sendBytesCount = udp?.EndSend(ar);
+            UdpClient? udp = ar.AsyncState as UdpClient;
+            int? sendBytesCount = udp?.EndSend(ar);
 
-                if (sendBytesCount is not null && 0 < sendBytesCount)
+            if (sendBytesCount is not null && 0 < sendBytesCount)
+            {
+                BeginInvoke(() =>
                 {
-                    this.BeginInvoke(() =>
+                    if (MessageList.Count == MAX_MESSAGE_COUNT)
                     {
-                        if (this.MessageList.Count == MAX_MESSAGE_COUNT)
-                        {
-                            this.MessageList.RemoveAt(0);
-                        }
+                        MessageList.RemoveAt(0);
+                    }
 
-                        this.MessageList.Add(new MessageControl
-                        {
-                            MessageText = this.InputMessage,
-                            MessageTime = DateTime.Now,
-                            IsSendMessage = true,
-                        });
+                    MessageList.Add(new MessageControl
+                    {
+                        MessageText = InputMessage,
+                        MessageTime = DateTime.Now,
+                        IsSendMessage = true,
                     });
-                }
-                else
-                {
-                    MessageBox.Show("メッセージ送信に失敗しました。");
-                }
+                });
             }
-            catch (Exception e)
+            else
             {
-                MessageBox.Show(e.ToString());
-                return;
+                MessageBox.Show("メッセージ送信に失敗しました。");
             }
         }
 
         private void DisConnect()
         {
-            client?.Close();
-            client = null;
+            _client?.Close();
+            _client = null;
             IsListening = false;
         }
 
