@@ -1,4 +1,8 @@
-﻿using SocketChatApp01.Common;
+﻿// ファイル名: MainWindowVM.cs
+// 作成日: 2022/12/27
+// 作成者: M.Gotou
+
+using SocketChatApp01.Common;
 using SocketChatApp01.Controls;
 using System;
 using System.Collections.Generic;
@@ -16,18 +20,30 @@ using System.Windows.Media;
 
 namespace SocketChatApp01.MVVM.Main
 {
+    /// <summary>
+    /// MainWindowのViewModelクラス
+    /// </summary>
     class MainWindowVM : BindableBase
     {
         #region 定数
+        /// <summary>
+        /// メッセージリストの最大保持数
+        /// </summary>
         private readonly int MAX_MESSAGE_COUNT = 50;
         #endregion
 
         #region プライベートフィールド
+        /// <summary>
+        /// UDPクライアント
+        /// </summary>
         private UdpClient? _client = null;
         #endregion
 
         #region プロパティ
         private string _localIP = "127.0.0.1";
+        /// <summary>
+        /// ローカルIP
+        /// </summary>
         public string LocalIP
         {
             get { return _localIP; }
@@ -42,6 +58,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private int? _localPort = 10001;
+        /// <summary>
+        /// ローカルポート
+        /// </summary>
         public int? LocalPort
         {
             get { return _localPort; }
@@ -56,6 +75,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private string _remoteIP = "127.0.0.1";
+        /// <summary>
+        /// リモートIP
+        /// </summary>
         public string RemoteIP
         {
             get { return _remoteIP; }
@@ -70,6 +92,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private int? _remotePort = 10002;
+        /// <summary>
+        /// リモートポート
+        /// </summary>
         public int? RemotePort
         {
             get { return _remotePort; }
@@ -84,6 +109,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private string _inputMessage = "";
+        /// <summary>
+        /// 入力メッセージ
+        /// </summary>
         public string InputMessage
         {
             get { return _inputMessage; }
@@ -99,6 +127,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private ObservableCollection<MessageControl> _messageList = new();
+        /// <summary>
+        /// メッセージリスト
+        /// </summary>
         public ObservableCollection<MessageControl> MessageList
         {
             get { return _messageList; }
@@ -113,6 +144,9 @@ namespace SocketChatApp01.MVVM.Main
         }
 
         private bool _isListening;
+        /// <summary>
+        /// 受信待ち中フラグ
+        /// </summary>
         public bool IsListening
         {
             get { return _isListening; }
@@ -122,7 +156,7 @@ namespace SocketChatApp01.MVVM.Main
                 {
                     _isListening = value;
                     OnPropertyChanged();
-                    ConnectCommand.OnCanExecuteChanged();
+                    ListenCommand.OnCanExecuteChanged();
                     SendMessageCommand.OnCanExecuteChanged();
                 }
             }
@@ -130,35 +164,50 @@ namespace SocketChatApp01.MVVM.Main
         #endregion
 
         #region コマンド
-        public DelegateCommand ConnectCommand { get; private set; }
+        /// <summary>
+        /// 受信待ち状態開始/終了コマンド
+        /// </summary>
+        public DelegateCommand ListenCommand { get; private set; }
 
+        /// <summary>
+        /// メッセージ送信コマンド
+        /// </summary>
         public DelegateCommand SendMessageCommand { get; private set; }
 
         #endregion
 
         #region コンストラクタ
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public MainWindowVM()
         {
-            ConnectCommand = new DelegateCommand(Connect);
+            ListenCommand = new DelegateCommand(BeginListen);
             SendMessageCommand = new DelegateCommand(SendMessage, () => IsListening && InputMessage != "");
         }
         #endregion
 
         #region デストラクタ
+        /// <summary>
+        /// デストラクタ
+        /// </summary>
         ~MainWindowVM()
         {
-            BeginInvoke(this.DisConnect);
+            BeginInvoke(this.EndListen);
         }
         #endregion
 
         #region プライベートメソッド
-        private void Connect()
+        /// <summary>
+        /// 受信待ち状態を開始します。
+        /// </summary>
+        private void BeginListen()
         {
             try
             {
                 if (IsListening)
                 {
-                    BeginInvoke(this.DisConnect);
+                    BeginInvoke(this.EndListen);
                 }
                 else
                 {
@@ -177,11 +226,15 @@ namespace SocketChatApp01.MVVM.Main
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.DisConnect);
+                BeginInvoke(this.EndListen);
                 return;
             }
         }
 
+        /// <summary>
+        /// 接続ソケットの疎通確認を行います。
+        /// </summary>
+        /// <returns></returns>
         private bool ValidateConnect()
         {
             if (!IPAddress.TryParse(this.LocalIP, out IPAddress? localIP) || localIP is null || !this.LocalPort.HasValue)
@@ -211,6 +264,10 @@ namespace SocketChatApp01.MVVM.Main
             return true;
         }
 
+        /// <summary>
+        /// 受信完了時に受信したメッセージを画面表示します。
+        /// </summary>
+        /// <param name="ar"></param>
         private void RecieveCallBack(IAsyncResult ar)
         {
             try
@@ -242,20 +299,23 @@ namespace SocketChatApp01.MVVM.Main
 
                 udp.BeginReceive(RecieveCallBack, udp);
             }
-            catch (SocketException se)
+            catch (SocketException)
             {
                 MessageBox.Show("Remoteとの接続が切断されました。");
-                BeginInvoke(this.DisConnect);
+                BeginInvoke(this.EndListen);
                 return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.DisConnect);
+                BeginInvoke(this.EndListen);
                 return;
             }
         }
 
+        /// <summary>
+        /// メッセージ送信します。
+        /// </summary>
         private void SendMessage()
         {
             try
@@ -264,30 +324,26 @@ namespace SocketChatApp01.MVVM.Main
                 byte[] sendBytes = Encoding.GetEncoding("Shift_JIS").GetBytes(InputMessage);
 
                 IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
-
-                IPEndPoint[] activeUdpListeners = IPGlobalProperties.GetIPGlobalProperties().GetActiveUdpListeners();
-                if (!activeUdpListeners.Contains(remoteEP))
-                {
-                    MessageBox.Show("Remoteが見つかりませんでした。");
-                    return;
-                }
-
                 _client.BeginSend(sendBytes, sendBytes.Length, remoteEP, SendCallBack, _client);
             }
-            catch (SocketException se)
+            catch (SocketException)
             {
                 MessageBox.Show("Remoteとの接続が切断されました。");
-                BeginInvoke(this.DisConnect);
+                BeginInvoke(this.EndListen);
                 return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.DisConnect);
+                BeginInvoke(this.EndListen);
                 return;
             }
         }
 
+        /// <summary>
+        /// 送信完了時に送信したメッセージを画面表示します。
+        /// </summary>
+        /// <param name="ar"></param>
         private void SendCallBack(IAsyncResult ar)
         {
             UdpClient? udp = ar.AsyncState as UdpClient;
@@ -316,16 +372,24 @@ namespace SocketChatApp01.MVVM.Main
             }
         }
 
-        private void DisConnect()
+        /// <summary>
+        /// 受信待ち状態を終了します。
+        /// </summary>
+        private void EndListen()
         {
             _client?.Close();
             _client = null;
             IsListening = false;
         }
 
-        private void BeginInvoke(Delegate method, params object[] args)
+        /// <summary>
+        /// Application.Current.Dispatcher.BeginInvokeに処理を渡します。
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="args"></param>
+        private void BeginInvoke(Action action, params object[] args)
         {
-            Application.Current.Dispatcher.BeginInvoke(method, args);
+            Application.Current.Dispatcher.BeginInvoke(action, args);
         }
         #endregion
     }

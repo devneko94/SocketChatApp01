@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ファイル名: MessageControl.xaml.cs
+// 作成日: 2022/12/27
+// 作成者: M.Gotou
+
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace SocketChatApp01.Controls
 {
@@ -23,6 +14,9 @@ namespace SocketChatApp01.Controls
     public partial class MessageControl : UserControl
     {
         #region 依存関係プロパティ
+        /// <summary>
+        /// メッセージテキスト依存関係プロパティ
+        /// </summary>
         public string MessageText
         {
             get { return (string)GetValue(MessageTextProperty); }
@@ -31,6 +25,9 @@ namespace SocketChatApp01.Controls
         public static readonly DependencyProperty MessageTextProperty =
             DependencyProperty.Register("MessageText", typeof(string), typeof(MessageControl), new PropertyMetadata(""));
 
+        /// <summary>
+        /// メッセージ時間依存関係プロパティ
+        /// </summary>
         public DateTime MessageTime
         {
             get { return (DateTime)GetValue(MessageTimeProperty); }
@@ -39,6 +36,9 @@ namespace SocketChatApp01.Controls
         public static readonly DependencyProperty MessageTimeProperty =
             DependencyProperty.Register("MessageTime", typeof(DateTime), typeof(MessageControl), new PropertyMetadata(default(DateTime)));
 
+        /// <summary>
+        /// 送信メッセージフラグ依存関係プロパティ
+        /// </summary>
         public bool IsSendMessage
         {
             get { return (bool)GetValue(IsSendMessageProperty); }
@@ -49,6 +49,9 @@ namespace SocketChatApp01.Controls
         #endregion
 
         #region コンストラクタ
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public MessageControl()
         {
             InitializeComponent();

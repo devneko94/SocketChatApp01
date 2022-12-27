@@ -27,6 +27,18 @@
 						Value="0" />
 				<Setter Property="FontSize"
 						Value="12" />
+				<Style.Triggers>
+					<DataTrigger Binding="{Binding IsListening}"
+								 Value="False">
+						<Setter Property="IsEnabled"
+								Value="True" />
+					</DataTrigger>
+					<DataTrigger Binding="{Binding IsListening}"
+								 Value="True">
+						<Setter Property="IsEnabled"
+								Value="False" />
+					</DataTrigger>
+				</Style.Triggers>
 			</Style>
 			<Style x:Key="SettngTextBlockStyle"
 				   TargetType="TextBlock"
@@ -45,12 +57,12 @@
 					<DataTrigger Binding="{Binding IsListening}"
 								 Value="False">
 						<Setter Property="Content"
-								Value="接続" />
+								Value="受信開始" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding IsListening}"
 								 Value="True">
 						<Setter Property="Content"
-								Value="切断" />
+								Value="受信終了" />
 					</DataTrigger>
 				</Style.Triggers>
 			</Style>
@@ -112,6 +124,7 @@
 				<c:MyTextBox Grid.Row="2"
 							 Grid.Column="1"
 							 Style="{StaticResource SettingTextBoxStyle}"
+							 IsEnabled="True"
 							 Text="{Binding RemoteIP}" />
 
 				<TextBlock Grid.Row="2"
@@ -123,6 +136,7 @@
 				<c:MyTextBox Grid.Row="2"
 							 Grid.Column="3"
 							 Style="{StaticResource SettingTextBoxStyle}"
+							 IsEnabled="True"
 							 Format="0-9"
 							 Text="{Binding RemotePort}" />
 
@@ -130,15 +144,13 @@
 						Grid.Column="4"
 						Style="{StaticResource SettngButtonStyle}"
 						Margin="5,0,0,0"
-						d:Content="接続"
-						Command="{Binding ConnectCommand}" />
+						Command="{Binding ListenCommand}" />
 			</Grid>
 		</Grid>
 
 		<Grid Grid.Row="1"
 			  Margin="5,20">
 			<ListView ItemsSource="{Binding MessageList}"
-					  VerticalAlignment="Bottom"
 					  BorderThickness="0"
 					  Background="Transparent">
 				<ListView.ItemContainerStyle>
