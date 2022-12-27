@@ -272,14 +272,14 @@ namespace SocketChatApp01.MVVM.Main
         {
             try
             {
-                UdpClient udp = ar.AsyncState as UdpClient;
-                if (udp.Client is null)
+                UdpClient? udp = ar.AsyncState as UdpClient;
+                if (udp?.Client is null)
                 {
                     return;
                 }
 
                 IPEndPoint remoteEP = new(IPAddress.Parse(RemoteIP), RemotePort!.Value);
-                byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP) ?? Array.Empty<byte>();
+                byte[] rcvBytes = udp.EndReceive(ar, ref remoteEP!) ?? Array.Empty<byte>();
                 string rcvMessage = Encoding.GetEncoding("Shift_JIS").GetString(rcvBytes);
 
                 BeginInvoke(() =>
