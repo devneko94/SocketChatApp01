@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SocketChatApp01.Controls.MessageControl"
+﻿<UserControl x:Class="SocketChatApp01.Controls.Message"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,12 +16,12 @@
 		<Grid.Style>
 			<Style TargetType="Grid">
 				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+					<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 								 Value="False">
 						<Setter Property="HorizontalAlignment"
 								Value="Left" />
 					</DataTrigger>
-					<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+					<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 								 Value="True">
 						<Setter Property="HorizontalAlignment"
 								Value="Right" />
@@ -34,16 +34,16 @@
 				   VerticalAlignment="Bottom"
 				   HorizontalAlignment="Right"
 				   FontSize="12"
-				   Text="{Binding MessageTime, StringFormat=H:mm, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}">
+				   Text="{Binding MessageTime, StringFormat=H:mm, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}">
 			<TextBlock.Style>
 				<Style TargetType="TextBlock">
 					<Style.Triggers>
-						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 									 Value="False">
 							<Setter Property="Grid.Column"
 									Value="2" />
 						</DataTrigger>
-						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 									 Value="True">
 							<Setter Property="Grid.Column"
 									Value="0" />
@@ -59,13 +59,13 @@
 			<Border.Style>
 				<Style TargetType="Border">
 					<Style.Triggers>
-						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 									 Value="False">
 							<Setter Property="Background"
 									Value="White" />
 						</DataTrigger>
 
-						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}"
+						<DataTrigger Binding="{Binding IsSendMessage, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}"
 									 Value="True">
 							<Setter Property="Background"
 									Value="DodgerBlue" />
@@ -82,7 +82,7 @@
 					 TextWrapping="WrapWithOverflow"
 					 MaxWidth="250"
 					 FontSize="16"
-					 Text="{Binding MessageText, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:MessageControl}}}" />
+					 Text="{Binding MessageText, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type c:Message}}}" />
 		</Border>
 	</Grid>
 </UserControl>

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace SocketChatApp01.Common
+namespace SocketChatApp01.Core
 {
     class DelegateCommand : ICommand
     {

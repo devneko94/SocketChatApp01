@@ -1,4 +1,4 @@
-﻿// ファイル名: MessageControl.xaml.cs
+﻿// ファイル名: Message.xaml.cs
 // 作成日: 2022/12/27
 // 作成者: M.Gotou
 
@@ -11,7 +11,7 @@ namespace SocketChatApp01.Controls
     /// <summary>
     /// MessageControl.xaml の相互作用ロジック
     /// </summary>
-    public partial class MessageControl : UserControl
+    public partial class Message : UserControl
     {
         #region 依存関係プロパティ
         /// <summary>
@@ -23,7 +23,7 @@ namespace SocketChatApp01.Controls
             set { SetValue(MessageTextProperty, value); }
         }
         public static readonly DependencyProperty MessageTextProperty =
-            DependencyProperty.Register("MessageText", typeof(string), typeof(MessageControl), new PropertyMetadata(""));
+            DependencyProperty.Register("MessageText", typeof(string), typeof(Message), new PropertyMetadata(""));
 
         /// <summary>
         /// メッセージ時間依存関係プロパティ
@@ -34,7 +34,7 @@ namespace SocketChatApp01.Controls
             set { SetValue(MessageTimeProperty, value); }
         }
         public static readonly DependencyProperty MessageTimeProperty =
-            DependencyProperty.Register("MessageTime", typeof(DateTime), typeof(MessageControl), new PropertyMetadata(default(DateTime)));
+            DependencyProperty.Register("MessageTime", typeof(DateTime), typeof(Message), new PropertyMetadata(default(DateTime)));
 
         /// <summary>
         /// 送信メッセージフラグ依存関係プロパティ
@@ -45,14 +45,14 @@ namespace SocketChatApp01.Controls
             set { SetValue(IsSendMessageProperty, value); }
         }
         public static readonly DependencyProperty IsSendMessageProperty =
-            DependencyProperty.Register("IsSendMessage", typeof(bool), typeof(MessageControl), new PropertyMetadata(false));
+            DependencyProperty.Register("IsSendMessage", typeof(bool), typeof(Message), new PropertyMetadata(false));
         #endregion
 
         #region コンストラクタ
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public MessageControl()
+        public Message()
         {
             InitializeComponent();
         }

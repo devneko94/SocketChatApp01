@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SocketChatApp01.MVVM.Main
+namespace SocketChatApp01.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

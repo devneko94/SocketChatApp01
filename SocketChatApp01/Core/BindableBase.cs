@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocketChatApp01.Common
+namespace SocketChatApp01.Core
 {
     public abstract class BindableBase : INotifyPropertyChanged
     {

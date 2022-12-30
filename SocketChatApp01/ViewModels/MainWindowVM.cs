@@ -2,8 +2,8 @@
 // 作成日: 2022/12/27
 // 作成者: M.Gotou
 
-using SocketChatApp01.Common;
 using SocketChatApp01.Controls;
+using SocketChatApp01.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
-namespace SocketChatApp01.MVVM.Main
+namespace SocketChatApp01.ViewModels
 {
     /// <summary>
     /// MainWindowのViewModelクラス
@@ -126,11 +126,11 @@ namespace SocketChatApp01.MVVM.Main
             }
         }
 
-        private ObservableCollection<MessageControl> _messageList = new();
+        private ObservableCollection<Message> _messageList = new();
         /// <summary>
         /// メッセージリスト
         /// </summary>
-        public ObservableCollection<MessageControl> MessageList
+        public ObservableCollection<Message> MessageList
         {
             get { return _messageList; }
             set
@@ -193,7 +193,19 @@ namespace SocketChatApp01.MVVM.Main
         /// </summary>
         ~MainWindowVM()
         {
-            BeginInvoke(this.EndListen);
+            BeginInvoke(EndListen);
+        }
+        #endregion
+
+        #region 静的メソッド
+        /// <summary>
+        /// Application.Current.Dispatcher.BeginInvokeに処理を渡します。
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="args"></param>
+        private static void BeginInvoke(Action action, params object[] args)
+        {
+            Application.Current.Dispatcher.BeginInvoke(action, args);
         }
         #endregion
 
@@ -207,7 +219,7 @@ namespace SocketChatApp01.MVVM.Main
             {
                 if (IsListening)
                 {
-                    BeginInvoke(this.EndListen);
+                    BeginInvoke(EndListen);
                 }
                 else
                 {
@@ -226,7 +238,7 @@ namespace SocketChatApp01.MVVM.Main
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                BeginInvoke(EndListen);
                 return;
             }
         }
@@ -237,7 +249,7 @@ namespace SocketChatApp01.MVVM.Main
         /// <returns></returns>
         private bool ValidateConnect()
         {
-            if (!IPAddress.TryParse(this.LocalIP, out IPAddress? localIP) || localIP is null || !this.LocalPort.HasValue)
+            if (!IPAddress.TryParse(LocalIP, out IPAddress? localIP) || localIP is null || !LocalPort.HasValue)
             {
                 MessageBox.Show("LocalIPまたはLocalPortが不正です。");
                 return false;
@@ -249,7 +261,7 @@ namespace SocketChatApp01.MVVM.Main
                 return false;
             }
 
-            if (!IPAddress.TryParse(this.RemoteIP, out IPAddress? remoteIP) || remoteIP is null || !this.RemotePort.HasValue)
+            if (!IPAddress.TryParse(RemoteIP, out IPAddress? remoteIP) || remoteIP is null || !RemotePort.HasValue)
             {
                 MessageBox.Show("RemoteIPまたはRemotePortが不正です。");
                 return false;
@@ -289,7 +301,7 @@ namespace SocketChatApp01.MVVM.Main
                         MessageList.RemoveAt(0);
                     }
 
-                    MessageList.Add(new MessageControl
+                    MessageList.Add(new Message
                     {
                         MessageText = rcvMessage,
                         MessageTime = DateTime.Now,
@@ -302,13 +314,13 @@ namespace SocketChatApp01.MVVM.Main
             catch (SocketException)
             {
                 MessageBox.Show("受信時にRemoteとの接続が切断されました。");
-                BeginInvoke(this.EndListen);
+                BeginInvoke(EndListen);
                 return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                BeginInvoke(EndListen);
                 return;
             }
         }
@@ -328,13 +340,13 @@ namespace SocketChatApp01.MVVM.Main
             catch (SocketException)
             {
                 MessageBox.Show("送信時にRemoteとの接続が切断されました。");
-                BeginInvoke(this.EndListen);
+                BeginInvoke(EndListen);
                 return;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-                BeginInvoke(this.EndListen);
+                BeginInvoke(EndListen);
                 return;
             }
         }
@@ -357,7 +369,7 @@ namespace SocketChatApp01.MVVM.Main
                         MessageList.RemoveAt(0);
                     }
 
-                    MessageList.Add(new MessageControl
+                    MessageList.Add(new Message
                     {
                         MessageText = InputMessage,
                         MessageTime = DateTime.Now,
@@ -375,16 +387,6 @@ namespace SocketChatApp01.MVVM.Main
             _client?.Close();
             _client = null;
             IsListening = false;
-        }
-
-        /// <summary>
-        /// Application.Current.Dispatcher.BeginInvokeに処理を渡します。
-        /// </summary>
-        /// <param name="action"></param>
-        /// <param name="args"></param>
-        private void BeginInvoke(Action action, params object[] args)
-        {
-            Application.Current.Dispatcher.BeginInvoke(action, args);
         }
         #endregion
     }
